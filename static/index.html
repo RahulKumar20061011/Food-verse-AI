@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Food Verse AI</title>
+<style>
+:root{--green:#16734c;--deep:#143d2c;--bg:#f4f8f4;--line:#dce7df;--muted:#65766b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#1c2b22;font:16px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{background:linear-gradient(115deg,#123c2b,#269768);color:white;padding:26px max(18px,calc((100% - 1120px)/2))}
+header h1{font-size:clamp(1.8rem,4vw,2.6rem);margin:0}header p{margin:4px 0 0;opacity:.92}
+main{max-width:1120px;margin:24px auto;padding:0 16px 40px}.hero,.panel{background:#fff;border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:18px;box-shadow:0 8px 28px #173c2b0a}
+.hero{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;align-items:center}.hero h2{margin:10px 0 4px;font-size:1.65rem}.pill{display:inline-block;background:#e1f4e8;color:#155b3b;padding:4px 10px;border-radius:999px;font-size:.82rem;font-weight:700}
+.featuregrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.feature{background:#f2f8f3;border-radius:12px;padding:12px}.feature b{display:block}.muted{color:var(--muted);font-size:.91rem}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}.navbtn{border:1px solid var(--line);border-radius:10px;padding:10px 13px;background:#fff;cursor:pointer;font:inherit;font-weight:650}.navbtn.active{background:var(--deep);color:white}
+.panel h2{margin:0 0 6px}.panel h3{margin:18px 0 4px}.view{display:none}.view.active{display:block}
+label{display:block;font-weight:650;margin:12px 0 5px}input,select,textarea{width:100%;font:inherit;padding:11px;border:1px solid #cbd8ce;border-radius:10px;background:white;color:#1c2b22}textarea{min-height:95px;resize:vertical}
+button.primary{border:0;background:var(--green);color:white;border-radius:10px;padding:11px 16px;font:inherit;font-weight:700;cursor:pointer;margin-top:14px}button:disabled{opacity:.6;cursor:wait}
+.result{white-space:pre-wrap;overflow-wrap:anywhere;background:#f7faf7;border:1px solid var(--line);padding:15px;border-radius:12px;margin-top:16px;min-height:65px}
+.preview{max-width:100%;max-height:240px;display:block;border-radius:12px;margin-top:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}.hidden{display:none!important}
+.history-item{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px}.history-item small{color:var(--muted)}.history-item p{white-space:pre-wrap;max-height:120px;overflow:auto}
+footer{text-align:center;color:var(--muted);font-size:.86rem;padding:12px}
+@media(max-width:680px){.hero{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.hero,.panel{padding:16px}.featuregrid{gap:7px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🥗 Food Verse AI</h1>
+  <p>Multimodal Food Intelligence Agent · Student Project</p>
+</header>
+<main>
+<section class="hero">
+  <div><span class="pill">AI-powered food assistant</span><h2>Make smarter choices about your food.</h2>
+  <p>Analyze meals, explore freshness clues, discover recipes, and plan meals with one simple assistant.</p>
+  <p class="muted">AI-generated nutrition is approximate. A photo cannot establish that food is safe.</p></div>
+  <div class="featuregrid">
+    <div class="feature">📊 <b>Nutrition</b><small> Calories and macros</small></div>
+    <div class="feature">🥬 <b>Freshness</b><small> Visible spoilage clues</small></div>
+    <div class="feature">🍲 <b>Recipes</b><small> Cook with what you have</small></div>
+    <div class="feature">🗓️ <b>Meal planner</b><small> Daily or weekly ideas</small></div>
+  </div>
+</section>
+
+<nav aria-label="Project modules">
+  <button class="navbtn active" data-view="nutrition">Nutrition analyzer</button>
+  <button class="navbtn" data-view="freshness">Freshness checker</button>
+  <button class="navbtn" data-view="recipes">Recipe assistant</button>
+  <button class="navbtn" data-view="planner">Meal planner</button>
+  <button class="navbtn" data-view="history">Recent history</button>
+</nav>
+
+<section id="nutrition" class="panel view active">
+  <h2>Nutrition analyzer</h2><p class="muted">Upload a clear photo of your meal for a rough nutrition estimate.</p>
+  <form id="nutritionForm"><label for="nutritionImage">Food image (JPG, PNG or WEBP; max 10 MB)</label><input id="nutritionImage" type="file" accept="image/jpeg,image/png,image/webp" required>
+  <img id="nutritionPreview" class="preview hidden" alt="Food image preview"><button class="primary">Analyze nutrition</button></form>
+  <div id="nutritionResult" class="result" aria-live="polite">Your nutrition analysis will appear here.</div>
+</section>
+
+<section id="freshness" class="panel view">
+  <h2>Freshness checker</h2><p class="muted">Looks for visible clues only. Harmful microbes and toxins can be invisible.</p>
+  <form id="freshnessForm"><label for="freshnessImage">Upload fruit, vegetable, or food image</label><input id="freshnessImage" type="file" accept="image/jpeg,image/png,image/webp" required>
+  <img id="freshnessPreview" class="preview hidden" alt="Selected food preview"><button class="primary">Check visible freshness clues</button></form>
+  <div id="freshnessResult" class="result" aria-live="polite">Your freshness assessment will appear here.</div>
+</section>
+
+<section id="recipes" class="panel view">
+  <h2>AI recipe assistant</h2><p class="muted">Tell the AI what ingredients you have. It will suggest two recipes.</p>
+  <form id="recipeForm"><label for="ingredients">Ingredients available</label><textarea id="ingredients" required placeholder="Example: potatoes, peas, onion, tomato, rice"></textarea>
+  <div class="grid2"><div><label for="recipeDiet">Diet preference</label><select id="recipeDiet"><option>No preference</option><option>Vegetarian</option><option>Vegan</option><option>Egg-based</option><option>High-protein</option><option>Jain vegetarian</option></select></div>
+  <div><label for="recipeTime">Time available</label><select id="recipeTime"><option>15 minutes</option><option selected>30 minutes</option><option>45 minutes</option><option>60 minutes</option></select></div></div>
+  <label for="servings">Number of servings</label><select id="servings"><option>1</option><option selected>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select>
+  <button class="primary">Generate recipes</button></form>
+  <div id="recipeResult" class="result" aria-live="polite">Your recipe ideas will appear here.</div>
+</section>
+
+<section id="planner" class="panel view">
+  <h2>Personalized meal planner</h2><p class="muted">Generate a practical plan and a grouped shopping list.</p>
+  <form id="plannerForm"><div class="grid2">
+  <div><label for="days">Plan duration</label><select id="days"><option value="1">1 day</option><option value="3" selected>3 days</option><option value="7">7 days</option></select></div>
+  <div><label for="plannerDiet">Diet preference</label><select id="plannerDiet"><option>Vegetarian</option><option>Vegan</option><option>Non-vegetarian</option><option>Egg-based</option><option>Jain vegetarian</option><option>No preference</option></select></div>
+  <div><label for="budget">Budget</label><select id="budget"><option>Budget-friendly</option><option>Moderate budget</option><option>Flexible budget</option></select></div>
+  <div><label for="goal">Meal-planning goal</label><select id="goal"><option>Balanced meals</option><option>More protein</option><option>More vegetables and fiber</option><option>Simple meals for a student</option><option>Family meal variety</option></select></div></div>
+  <label for="dislikes">Foods to avoid, allergies, or dislikes</label><textarea id="dislikes" placeholder="Mention allergies or ingredients you want to avoid. Verify every ingredient before eating."></textarea>
+  <button class="primary">Create meal plan</button></form>
+  <div id="plannerResult" class="result" aria-live="polite">Your meal plan will appear here.</div>
+</section>
+
+<section id="history" class="panel view">
+  <h2>Recent history</h2><p class="muted">The latest results are saved in a local SQLite database on this computer.</p>
+  <button id="refreshHistory" class="primary">Refresh history</button><div id="historyResult" aria-live="polite">Select refresh to load recent results.</div>
+</section>
+
+<footer>Food Verse AI · FastAPI + Gemini API + SQLite · Prototype for academic use</footer>
+</main>
+<script>
+document.querySelectorAll(".navbtn").forEach(button => button.addEventListener("click", () => {
+  document.querySelectorAll(".navbtn").forEach(b => b.classList.toggle("active", b === button));
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === button.dataset.view));
+  if (button.dataset.view === "history") loadHistory();
+}));
+function previewImage(inputId, previewId) {
+  const input = document.getElementById(inputId), preview = document.getElementById(previewId);
+  input.addEventListener("change", () => {
+    const file = input.files[0];
+    if (!file) { preview.classList.add("hidden"); return; }
+    preview.src = URL.createObjectURL(file); preview.classList.remove("hidden");
+  });
+}
+previewImage("nutritionImage", "nutritionPreview");
+previewImage("freshnessImage", "freshnessPreview");
+
+async function postForm(url, data, resultEl, button) {
+  const oldText = button.textContent; button.disabled = true; button.textContent = "Working…";
+  resultEl.textContent = "Food Verse AI is processing your request…";
+  try {
+    const response = await fetch(url, {method:"POST", body:data});
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.detail || "Request failed.");
+    resultEl.textContent = body.result || "No result returned.";
+    loadHistory();
+  } catch (error) {
+    resultEl.textContent = "Error: " + error.message + "\n\nCheck that the backend is running and your API key is configured in .env.";
+  } finally { button.disabled = false; button.textContent = oldText; }
+}
+function bindImageForm(formId, inputId, mode, resultId) {
+  document.getElementById(formId).addEventListener("submit", event => {
+    event.preventDefault(); const file = document.getElementById(inputId).files[0]; if (!file) return;
+    const data = new FormData(); data.append("image", file); data.append("mode", mode);
+    postForm("/api/analyze-food", data, document.getElementById(resultId), event.submitter);
+  });
+}
+bindImageForm("nutritionForm", "nutritionImage", "nutrition", "nutritionResult");
+bindImageForm("freshnessForm", "freshnessImage", "freshness", "freshnessResult");
+
+document.getElementById("recipeForm").addEventListener("submit", event => {
+  event.preventDefault(); const data = new FormData();
+  data.append("ingredients", document.getElementById("ingredients").value);
+  data.append("diet", document.getElementById("recipeDiet").value);
+  data.append("time_limit", document.getElementById("recipeTime").value);
+  data.append("servings", document.getElementById("servings").value);
+  postForm("/api/recipes", data, document.getElementById("recipeResult"), event.submitter);
+});
+document.getElementById("plannerForm").addEventListener("submit", event => {
+  event.preventDefault(); const data = new FormData();
+  ["days","plannerDiet","budget","goal","dislikes"].forEach(id => {
+    const key = {"plannerDiet":"diet","dislikes":"dislikes"}[id] || id;
+    data.append(key, document.getElementById(id).value);
+  });
+  postForm("/api/meal-plan", data, document.getElementById("plannerResult"), event.submitter);
+});
+async function loadHistory() {
+  const target = document.getElementById("historyResult"); target.textContent = "Loading…";
+  try {
+    const response = await fetch("/api/history"); const data = await response.json();
+    if (!data.items.length) { target.textContent = "No history yet. Try one of the modules first."; return; }
+    target.replaceChildren();
+    data.items.forEach(item => {
+      const card = document.createElement("article"); card.className = "history-item";
+      const heading = document.createElement("b"); heading.textContent = item.feature;
+      const meta = document.createElement("small"); meta.textContent = " · " + item.created_at.replace("T"," ");
+      const input = document.createElement("div"); input.textContent = item.user_input;
+      const output = document.createElement("p"); output.textContent = item.result;
+      card.append(heading, meta, input, output); target.append(card);
+    });
+  } catch (error) { target.textContent = "Could not load history: " + error.message; }
+}
+document.getElementById("refreshHistory").addEventListener("click", loadHistory);
+</script>
+</body>
+</html>
